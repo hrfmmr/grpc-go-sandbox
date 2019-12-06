@@ -12,6 +12,7 @@ import (
 	"github.com/hrfmmr/grpc-go-sandbox/greet/greetpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -105,7 +106,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen:%v", err)
 	}
-	s := grpc.NewServer()
+	certFile := "ssl/server.crt"
+	keyFile := "ssl/server.pem"
+	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	opts := grpc.Creds(creds)
+	s := grpc.NewServer(opts)
 	greetpb.RegisterGreetServiceServer(s, &server{})
 	fmt.Println("Listening greeting request...")
 	if err := s.Serve(lis); err != nil {

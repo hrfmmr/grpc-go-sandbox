@@ -10,24 +10,31 @@ import (
 	"github.com/hrfmmr/grpc-go-sandbox/greet/greetpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
 func main() {
 	fmt.Println("Hello, I'm a client")
 
-	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	certFile := "ssl/ca.crt"
+	creds, err := credentials.NewClientTLSFromFile(certFile, "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	opts := grpc.WithTransportCredentials(creds)
+	cc, err := grpc.Dial("localhost:50051", opts)
 	if err != nil {
 		log.Fatalf("could not connect:%v", err)
 	}
 	defer cc.Close()
 	c := greetpb.NewGreetServiceClient(cc)
-	// doUnary(c)
+	doUnary(c)
 	// doServerStreaming(c)
 	// doClientStreaming(c)
 	// doBiDiStreaming(c)
-	doUnaryWithDeadline(c, "Alice", 5*time.Second) // should complete
-	doUnaryWithDeadline(c, "Bob", 1*time.Second)   // should timeout
+	// doUnaryWithDeadline(c, "Alice", 5*time.Second) // should complete
+	// doUnaryWithDeadline(c, "Bob", 1*time.Second)   // should timeout
 }
 
 func doUnary(c greetpb.GreetServiceClient) {
