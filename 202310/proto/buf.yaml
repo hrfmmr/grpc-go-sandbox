@@ -2,3 +2,6 @@ version: v1
 lint:
   use:
     - DEFAULT
+breaking:
+  use:
+    - FILE
